@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.osmi.dev.demo_github_actions.DemoGithubActionsApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.322 s -- in com.osmi.dev.demo_github_actions.DemoGithubActionsApplicationTests
