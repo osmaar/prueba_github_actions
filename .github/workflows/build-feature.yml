@@ -1,0 +1,51 @@
+# 1. NAME - Nombre del workflow, aparece en la pestaña "Actions" de GitHub
+name: build and test feature branch
+
+# 2. ON - Define CUÁNDO se ejecuta este workflow
+on:
+  # Se ejecuta cuando haces push a cualquier rama feature/*
+  push:
+    branches:
+      - 'feature/**'
+  # También se ejecuta cuando creas un Pull Request hacia master
+  pull_request:
+    branches:
+      - master
+
+# 3. JOBS - Define QUÉ trabajos se ejecutan
+jobs:
+  # "build" es el identificador del job (puedes ponerle el nombre que quieras)
+  build:
+    # En qué sistema operativo corre. GitHub te da máquinas virtuales gratis.
+    # Opciones comunes: ubuntu-latest, windows-latest, macos-latest
+    runs-on: ubuntu-latest
+
+    # STEPS - Los pasos que ejecuta este job, EN ORDEN
+    steps:
+      # Paso 1: Descargar el código del repositorio en la máquina virtual
+      # "uses" = usa una ACTION pre-hecha de la comunidad
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # Paso 2: Instalar Java 21 (tu pom.xml usa java.version=21)
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'  # Distribución de Java (Eclipse Adoptium)
+          cache: 'maven'           # Cachea ~/.m2 para builds más rápidos
+
+      # Paso 3: Compilar el proyecto
+      # "run" = ejecuta un comando de terminal
+      - name: Build con Maven
+        run: mvn clean compile -B
+        # -B = modo batch (sin prompts interactivos, ideal para CI)
+
+      # Paso 4: Ejecutar los tests
+      - name: Ejecutar tests
+        run: mvn test -B
+
+      # Paso 5: Empaquetar el .jar
+      - name: Package
+        run: mvn package -B -DskipTests
+        # -DskipTests = no re-ejecuta tests (ya corrieron en el paso anterior)
