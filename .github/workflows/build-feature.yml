@@ -52,18 +52,27 @@ jobs:
 
       # Paso 6: Crear Pull Request a master automáticamente
       # Solo se ejecuta en push (no cuando ya es un PR) para evitar duplicados
+      # Usa el CLI de GitHub (gh) que viene preinstalado en las máquinas de GitHub Actions
       - name: Crear Pull Request a master
         if: github.event_name == 'push'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }}           # La rama actual (ej: feature/github-actions)
-          base: master                              # Hacia dónde va el PR
-          title: "Merge ${{ github.ref_name }} into master"
-          body: |
-            PR creado automáticamente por GitHub Actions.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Verificar si ya existe un PR abierto desde esta rama
+          EXISTING_PR=$(gh pr list --head "${{ github.ref_name }}" --base master --state open --json number --jq '.[0].number')
 
-            **Branch:** `${{ github.ref_name }}`
-            **Commit:** `${{ github.sha }}`
+          if [ -z "$EXISTING_PR" ]; then
+            echo "Creando nuevo Pull Request..."
+            gh pr create \
+              --base master \
+              --head "${{ github.ref_name }}" \
+              --title "Merge ${{ github.ref_name }} into master" \
+              --body "PR creado automáticamente por GitHub Actions.
 
-            Build y tests pasaron exitosamente.
+          **Branch:** \`${{ github.ref_name }}\`
+          **Commit:** \`${{ github.sha }}\`
+
+          Build y tests pasaron exitosamente."
+          else
+            echo "Ya existe un PR abierto (#$EXISTING_PR), no se crea uno nuevo."
+          fi
