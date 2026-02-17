@@ -49,3 +49,21 @@ jobs:
       - name: Package
         run: mvn package -B -DskipTests
         # -DskipTests = no re-ejecuta tests (ya corrieron en el paso anterior)
+
+      # Paso 6: Crear Pull Request a master automáticamente
+      # Solo se ejecuta en push (no cuando ya es un PR) para evitar duplicados
+      - name: Crear Pull Request a master
+        if: github.event_name == 'push'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}           # La rama actual (ej: feature/github-actions)
+          base: master                              # Hacia dónde va el PR
+          title: "Merge ${{ github.ref_name }} into master"
+          body: |
+            PR creado automáticamente por GitHub Actions.
+
+            **Branch:** `${{ github.ref_name }}`
+            **Commit:** `${{ github.sha }}`
+
+            Build y tests pasaron exitosamente.
