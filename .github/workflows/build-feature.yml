@@ -20,6 +20,12 @@ jobs:
     # Opciones comunes: ubuntu-latest, windows-latest, macos-latest
     runs-on: ubuntu-latest
 
+    # PERMISOS: El GITHUB_TOKEN por defecto es de solo lectura.
+    # Para crear PRs necesitamos darle permisos de escritura explícitamente.
+    permissions:
+      contents: read          # Leer el código del repo
+      pull-requests: write    # Crear y modificar Pull Requests
+
     # STEPS - Los pasos que ejecuta este job, EN ORDEN
     steps:
       # Paso 1: Descargar el código del repositorio en la máquina virtual
